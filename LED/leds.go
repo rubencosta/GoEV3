@@ -3,9 +3,10 @@ package LED
 
 import (
 	"fmt"
-	"github.com/ldmberman/GoEV3/utilities"
 	"log"
 	"os"
+
+	"github.com/ldmberman/GoEV3/utilities"
 )
 
 // Constants for the LED positions (left and right).
@@ -39,23 +40,23 @@ func findFilename(color Color, position Position) string {
 	return filename
 }
 
+// Set Brightness (0 - 255)
+func SetBrightness(color Color, position Position, brightness uint8) {
+	if color == Amber {
+		utilities.WriteIntValue(findFilename(Green, position), "brightness", int64(brightness))
+		utilities.WriteIntValue(findFilename(Red, position), "brightness", int64(brightness))
+	} else {
+		utilities.WriteIntValue(findFilename(color, position), "brightness", int64(brightness))
+	}
+
+}
+
 // Turns on the given LED with the specified color.
 func TurnOn(color Color, position Position) {
-	if color == Amber {
-		utilities.WriteIntValue(findFilename(Green, position), "brightness", 1)
-		utilities.WriteIntValue(findFilename(Red, position), "brightness", 1)
-	} else {
-		utilities.WriteIntValue(findFilename(color, position), "brightness", 1)
-	}
+	SetBrightness(color, position, 255)
 }
 
 // Turns off the given LED with the specified color.
 func TurnOff(color Color, position Position) {
-	if color == Amber {
-		utilities.WriteIntValue(findFilename(Green, position), "brightness", 0)
-		utilities.WriteIntValue(findFilename(Red, position), "brightness", 0)
-	} else {
-		utilities.WriteIntValue(findFilename(color, position), "brightness", 0)
-	}
+	SetBrightness(color, position, 0)
 }
-
