@@ -2,6 +2,7 @@ package Sensors
 
 import (
 	"fmt"
+
 	"github.com/ldmberman/GoEV3/utilities"
 )
 
@@ -18,9 +19,18 @@ func FindGyroSensor(port InPort) *GyroSensor {
 	s.port = port
 
 	path := fmt.Sprintf("%s/%s", baseSensorPath, snr)
-	utilities.WriteStringValue(path, "mode", "GYRO-G&A")
+	utilities.WriteStringValue(path, "mode", "GYRO-ANG")
 
 	return s
+}
+
+// Resets the gyro sensor
+func (self *GyroSensor) Reset() {
+	snr := findSensor(self.port, TypeGyro)
+
+	path := fmt.Sprintf("%s/%s", baseSensorPath, snr)
+	utilities.WriteStringValue(path, "mode", "GYRO-G&A")
+	utilities.WriteStringValue(path, "mode", "GYRO-ANG")
 }
 
 // Reads the angle of degrees.
