@@ -2,10 +2,11 @@
 package Motor
 
 import (
-	"github.com/ldmberman/GoEV3/utilities"
 	"log"
 	"os"
 	"path"
+
+	"github.com/ldmberman/GoEV3/utilities"
 )
 
 // Constants for output ports.
@@ -31,6 +32,9 @@ const (
 	runFD            = "command"
 	stopModeFD       = "stop_command"
 	positionFD       = "position"
+	positionSpFD     = "position_sp"
+	timeSpFD         = "time_sp"
+	stateFD          = "state"
 )
 
 func findFolder(port OutPort) string {
@@ -52,7 +56,7 @@ func findFolder(port OutPort) string {
 		}
 	}
 
-	log.Fatal("No motor is connected to port ", port )
+	log.Fatal("No motor is connected to port ", port)
 	return ""
 }
 
@@ -83,6 +87,44 @@ func Run(port OutPort, speed int16) {
 		}
 		utilities.WriteIntValue(folder, powerSetterFD, int64(speed))
 		utilities.WriteStringValue(folder, runFD, "run-forever")
+	}
+}
+
+func RunToRelPos(port OutPort, speed int16, position int32) {
+	folder := findFolder(port)
+	regulationMode := utilities.ReadStringValue(folder, regulationModeFD)
+
+	switch regulationMode {
+	case "on":
+		utilities.WriteIntValue(folder, speedSetterFD, int64(speed))
+		utilities.WriteIntValue(folder, positionSpFD, int64(position))
+		utilities.WriteStringValue(folder, runFD, "run-to-rel-pos")
+	case "off":
+		if speed > 100 || speed < -100 {
+			log.Fatal("The speed must be in range [-100, 100]")
+		}
+		utilities.WriteIntValue(folder, powerSetterFD, int64(speed))
+		utilities.WriteIntValue(folder, positionSpFD, int64(position))
+		utilities.WriteStringValue(folder, runFD, "run-to-rel-pos")
+	}
+}
+
+func RunTimed(port OutPort, speed int16, milliseconds int32) {
+	folder := findFolder(port)
+	regulationMode := utilities.ReadStringValue(folder, regulationModeFD)
+
+	switch regulationMode {
+	case "on":
+		utilities.WriteIntValue(folder, speedSetterFD, int64(speed))
+		utilities.WriteIntValue(folder, timeSpFD, int64(milliseconds))
+		utilities.WriteStringValue(folder, runFD, "run-timed")
+	case "off":
+		if speed > 100 || speed < -100 {
+			log.Fatal("The speed must be in range [-100, 100]")
+		}
+		utilities.WriteIntValue(folder, powerSetterFD, int64(speed))
+		utilities.WriteIntValue(folder, timeSpFD, int64(milliseconds))
+		utilities.WriteStringValue(folder, runFD, "run-timed")
 	}
 }
 
@@ -130,4 +172,9 @@ func CurrentPosition(port OutPort) int32 {
 // Set the position of the motor at the given port.
 func InitializePosition(port OutPort, value int32) {
 	utilities.WriteIntValue(findFolder(port), positionFD, int64(value))
+}
+
+// Read motor state
+func ReadState(port OutPort) string {
+	return utilities.ReadStringValue(findFolder(port), stateFD)
 }
