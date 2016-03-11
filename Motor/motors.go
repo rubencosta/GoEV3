@@ -60,6 +60,12 @@ func findFolder(port OutPort) string {
 	return ""
 }
 
+// Resets motor
+func Reset(port OutPort) {
+	folder := findFolder(port)
+	utilities.WriteStringValue(folder, runFD, "reset")
+}
+
 // Runs the motor at the given port.
 // The meaning of `speed` parameter depends on whether the regulation mode is turned on or off.
 //
@@ -90,6 +96,7 @@ func Run(port OutPort, speed int16) {
 	}
 }
 
+// Runs the motor at speed to relative position
 func RunToRelPos(port OutPort, speed int16, position int32) {
 	folder := findFolder(port)
 	regulationMode := utilities.ReadStringValue(folder, regulationModeFD)
@@ -109,6 +116,7 @@ func RunToRelPos(port OutPort, speed int16, position int32) {
 	}
 }
 
+// Runs the motor at speed for miliseconds
 func RunTimed(port OutPort, speed int16, milliseconds int32) {
 	folder := findFolder(port)
 	regulationMode := utilities.ReadStringValue(folder, regulationModeFD)
